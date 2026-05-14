@@ -55,7 +55,7 @@ export function Scene() {
       />
 
       {/* Daytime Environment */}
-      <Environment preset="city" />
+      <hemisphereLight skyColor="#ffffff" groundColor="#aaccff" intensity={0.6} />
       <Sky sunPosition={[100, 20, -100]} turbidity={0.2} rayleigh={0.5} />
       
       <fog attach="fog" args={["#e5effa", 15, 70]} />

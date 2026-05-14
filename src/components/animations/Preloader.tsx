@@ -9,11 +9,24 @@ export default function Preloader() {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    // If progress completes or a fallback timer finishes, fade out
+    let t: NodeJS.Timeout;
+    
+    // Ensure the preloader stays on screen for at least 2.5 seconds to cover dynamic import lag
+    const minDelay = setTimeout(() => {
+      if (!active) {
+        setShow(false);
+      }
+    }, 2500);
+
+    // If progress completes after the minimum delay
     if (!active && progress === 100) {
-      const t = setTimeout(() => setShow(false), 800);
-      return () => clearTimeout(t);
+      t = setTimeout(() => setShow(false), 3000);
     }
+    
+    return () => {
+      clearTimeout(minDelay);
+      if (t) clearTimeout(t);
+    };
   }, [progress, active]);
 
   // Fallback timeout to ensure the app loads even if 3D hangs
