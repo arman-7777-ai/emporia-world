@@ -23,6 +23,7 @@ export default function Hero() {
   return (
     <section
       ref={containerRef}
+      style={{ position: "relative" }}
       className="relative h-[120vh] w-full overflow-hidden bg-[#e5effa] dark:bg-[#030303]"
     >
       {/* 3D Scene Background */}

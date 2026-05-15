@@ -24,7 +24,7 @@ export default function Showcase() {
   const activeProject = PROPERTIES.find((p) => p.id === selectedProject);
 
   return (
-    <section id="collection" ref={containerRef} className="relative h-[400vh] bg-[#fafaf9]">
+    <section id="collection" ref={containerRef} style={{ position: "relative" }} className="relative h-[400vh] bg-[#fafaf9]">
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
         
         {/* Background Ambient Elements */}
