@@ -50,7 +50,7 @@ export default function Parallax({
   return (
     <motion.div
       ref={ref}
-      style={{ ...style, willChange: "transform" }}
+      style={{ ...style, willChange: "transform", position: "relative" }}
       className={className}
     >
       {children}

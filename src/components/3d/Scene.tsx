@@ -1,24 +1,34 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Float, ContactShadows, Sky } from "@react-three/drei";
-import { useScroll } from "framer-motion";
+import { Environment, Float, Sky, Clouds, Cloud } from "@react-three/drei";
 import { MathUtils } from "three";
 import { Skyscraper } from "./Skyscraper";
 
 function CameraRig() {
-  const { scrollYProgress } = useScroll();
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Normalize scroll (approx max scroll 1000px for hero)
+      const scroll = Math.min(window.scrollY / window.innerHeight, 1);
+      setScrollY(scroll);
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Initialize
+    handleScroll();
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useFrame((state) => {
-    // Scroll progress from 0 to 1
-    const scroll = scrollYProgress.get();
-    
     // Smoothly interpolate camera position based on scroll
     // Start low, looking up (hero), move up as user scrolls
-    const targetY = MathUtils.lerp(2, 15, scroll);
-    const targetZ = MathUtils.lerp(18, 25, scroll);
-    const targetX = MathUtils.lerp(0, 10, scroll);
+    const targetY = MathUtils.lerp(2, 15, scrollY);
+    const targetZ = MathUtils.lerp(18, 25, scrollY);
+    const targetX = MathUtils.lerp(0, 10, scrollY);
     
     state.camera.position.y = MathUtils.lerp(state.camera.position.y, targetY, 0.05);
     state.camera.position.z = MathUtils.lerp(state.camera.position.z, targetZ, 0.05);
@@ -35,8 +45,8 @@ export function Scene() {
   return (
     <Canvas 
       camera={{ position: [0, 2, 18], fov: 45 }}
-      gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-      dpr={[1, 1.5]}
+      gl={{ antialias: false, alpha: true, powerPreference: "default" }}
+      dpr={1}
     >
       <color attach="background" args={["#e5effa"]} />
       
@@ -46,7 +56,6 @@ export function Scene() {
         position={[20, 50, -20]} 
         intensity={2.5} 
         color="#fff5e6" 
-        castShadow
       />
       <directionalLight 
         position={[-10, 20, 10]} 
@@ -54,8 +63,7 @@ export function Scene() {
         color="#aaccff" 
       />
 
-      {/* Daytime Environment */}
-      {/* Daytime Environment */}
+      {/* The Magic: Environment maps make the glass reflect a city instead of black! */}
       <Environment preset="city" />
       <Sky sunPosition={[100, 20, -100]} turbidity={0.2} rayleigh={0.5} />
       
@@ -65,14 +73,19 @@ export function Scene() {
         <Skyscraper />
       </Float>
 
-      <ContactShadows 
-        position={[0, -10, 0]} 
-        opacity={0.3} 
-        scale={40} 
-        blur={2} 
-        far={10} 
-        color="#0a0a0a" 
-      />
+      {/* Soft Volumetric Clouds wrapped around the building */}
+      <Clouds material="basic">
+        <Cloud segments={20} bounds={[10, 2, 2]} volume={10} color="#ffffff" opacity={0.5} position={[-8, 8, -5]} />
+        <Cloud segments={20} bounds={[10, 2, 2]} volume={10} color="#ffffff" opacity={0.4} position={[8, 12, -8]} />
+        <Cloud segments={20} bounds={[10, 2, 2]} volume={10} color="#ffffff" opacity={0.3} position={[0, 18, -10]} />
+        <Cloud segments={20} bounds={[20, 2, 2]} volume={15} color="#e5effa" opacity={0.8} position={[0, -2, 0]} />
+      </Clouds>
+
+      {/* Lightweight stable shadow instead of heavy ContactShadows */}
+      <mesh position={[0, -10, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[15, 32]} />
+        <meshBasicMaterial color="#0a0a0a" transparent opacity={0.15} />
+      </mesh>
       
       <CameraRig />
     </Canvas>

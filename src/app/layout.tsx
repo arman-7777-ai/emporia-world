@@ -26,9 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth relative">
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} font-body bg-[#ffffff] dark:bg-[#030303] text-[#111111] dark:text-[#ffffff] antialiased selection:bg-[#c9a96e]/30 selection:text-[#000000] dark:selection:text-white transition-colors duration-700`}
+        className={`relative ${inter.variable} ${spaceGrotesk.variable} font-body bg-[#ffffff] dark:bg-[#030303] text-[#111111] dark:text-[#ffffff] antialiased selection:bg-[#c9a96e]/30 selection:text-[#000000] dark:selection:text-white transition-colors duration-700`}
       >
         <Preloader />
         <div className="grain-overlay opacity-50 dark:opacity-100" />

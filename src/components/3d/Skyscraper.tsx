@@ -1,45 +1,46 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Group, MathUtils, Mesh } from "three";
-import { useScroll } from "framer-motion";
+import { Group, MathUtils } from "three";
 
 export function Skyscraper() {
   const group = useRef<Group>(null);
-  
-  const { scrollYProgress } = useScroll();
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Normalize scroll (approx max scroll 1000px for hero)
+      const scroll = Math.min(window.scrollY / window.innerHeight, 1);
+      setScrollY(scroll);
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Initialize
+    handleScroll();
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useFrame((state, delta) => {
     if (group.current) {
       // Very slow ambient rotation
-      group.current.rotation.y += delta * 0.02;
+      group.current.rotation.y += delta * 0.05;
       
       // Scroll-based rotation overlay
-      const scrollValue = scrollYProgress.get();
+      // We lerp the entire group towards the ambient rotation + scroll offset
+      const targetRotation = group.current.rotation.y + (scrollY * Math.PI * 0.05);
+      
       group.current.rotation.y = MathUtils.lerp(
         group.current.rotation.y,
-        scrollValue * Math.PI * 0.5,
-        0.05
+        targetRotation,
+        0.1
       );
     }
   });
 
   const levels = 35;
   const levelHeight = 0.8;
-
-  // Generate random window lights to give life to the building
-  const windows = useMemo(() => {
-    const lights = [];
-    for (let i = 0; i < levels; i++) {
-      for (let j = 0; j < 4; j++) {
-        if (Math.random() > 0.7) {
-          lights.push({ level: i, face: j });
-        }
-      }
-    }
-    return lights;
-  }, []);
 
   return (
     <group ref={group} position={[0, -10, 0]}>
@@ -67,35 +68,16 @@ export function Skyscraper() {
             {/* Glass Shell */}
             <mesh>
               <boxGeometry args={[4, levelHeight - 0.05, 4]} />
-              <meshPhysicalMaterial 
+              <meshStandardMaterial 
                 color="#e5effa"
-                metalness={0.9}
-                roughness={0.02}
+                metalness={1}
+                roughness={0.05}
                 envMapIntensity={3.5}
-                clearcoat={1}
-                clearcoatRoughness={0.05}
                 transparent={true}
                 opacity={0.85}
               />
             </mesh>
 
-            {/* Illuminated Windows */}
-            {windows
-              .filter((w) => w.level === i)
-              .map((w, index) => {
-                const rot = (w.face * Math.PI) / 2;
-                return (
-                  <mesh key={index} position={[0, 0, 0]} rotation={[0, rot, 0]}>
-                    <mesh position={[0, 0, 2.01]}>
-                      <planeGeometry args={[0.5, levelHeight - 0.2]} />
-                      <meshBasicMaterial 
-                        color={Math.random() > 0.5 ? "#c9a96e" : "#ffead0"} 
-                        toneMapped={false} 
-                      />
-                    </mesh>
-                  </mesh>
-                );
-              })}
           </group>
         );
       })}
