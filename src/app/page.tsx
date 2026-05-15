@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main className="bg-[#fafaf9] min-h-screen">
+    <main className="relative bg-[#ffffff] dark:bg-[#030303] min-h-screen transition-colors duration-700">
       <Header />
       <Hero />
       <Philosophy />
